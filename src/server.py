@@ -22,9 +22,9 @@ import os
 import ctypes
 
 so = ctypes.cdll.LoadLibrary
-lac_lib = so('../lib/liblac.so')
+lac_lib = so('./lib/liblac.so')
 print("cut_sentence")
-lac_lib.freeme.argtypes = ctypes.c_char_p,
+lac_lib.freeme.argtypes = ctypes.c_void_p,
 lac_lib.freeme.restype = None
 lac_lib.cut_sentence.restype = ctypes.c_void_p
 
