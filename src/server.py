@@ -19,6 +19,14 @@ from paddle import fluid
 import infer
 import logging
 import os
+import ctypes
+
+so = ctypes.cdll.LoadLibrary
+lac_lib = so('../lib/liblac.so')
+print("cut_sentence")
+lac_lib.freeme.argtypes = ctypes.c_char_p,
+lac_lib.freeme.restype = None
+lac_lib.cut_sentence.restype = ctypes.c_void_p
 
 
 def init_logging(filename):
@@ -68,11 +76,17 @@ def parse_args():
         default="./conf/q2b.dic",
         help="The path of the word replacement Dictionary. (default: %(default)s)"
     )
+    parser.add_argument(
+        "--conf_path",
+        type=str,
+        default="./conf/",
+        help="The path of the configure file Dictionary. (default: %(default)s)"
+    )
     args = parser.parse_args()
     return args
 
 
-def cut_sentence(args, line):
+def cut_sentence_python(args, line):
     id2word_dict = reader.load_dict(args.word_dict_path)
     word2id_dict = reader.load_reverse_dict(args.word_dict_path)
 
@@ -129,12 +143,24 @@ def cut_sentence(args, line):
             return full_out_str.strip()
 
 
+def cut_sentence_cpp(line, conf_dir='../conf'):
+    result = lac_lib.cut_sentence(conf_dir, 512, line)
+    logging.info(type(result))
+    logging.info(hex(result))
+    cut_result = ctypes.cast(result, ctypes.c_char_p).value
+    logging.info("return result: " + cut_result)
+    lac_lib.freeme(result)
+    logging.info(lac_lib.sum(1, 2))
+
+    return cut_result
+
+
 class LacHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
         logging.info(main_args)
         if self.request.arguments.has_key('data'):
             logging.info(self.get_argument('data').encode(encoding='utf8'))
-            result = cut_sentence(main_args, self.get_argument('data').encode(encoding='utf8'))
+            result = cut_sentence_cpp(self.get_argument('data').encode(encoding='utf8'), conf_dir=main_args.conf_path)
             self.write(result)
         else:
             logging.info('没有数据')

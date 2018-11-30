@@ -18,9 +18,8 @@ s = '''
 '''
 lac_lib.freeme.argtypes = ctypes.c_char_p,
 lac_lib.freeme.restype = None
-cut_sentence = lac_lib.cut_sentence
-cut_sentence.restype = ctypes.c_void_p
-result = cut_sentence('../conf', 512, s)
+lac_lib.cut_sentence.restype = ctypes.c_void_p
+result = lac_lib.cut_sentence('../conf', 512, s)
 print(type(result))
 print(hex(result))
 cut_result = ctypes.cast(result, ctypes.c_char_p).value
