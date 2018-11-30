@@ -17,6 +17,17 @@ import reader
 import paddle
 from paddle import fluid
 import infer
+import logging
+import os
+
+
+def init_logging(filename):
+    filename = os.path.join("logs", filename)
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s %(levelname)-8s %(filename)s:%(lineno)-4d: %(message)s",
+                        datefmt="%m-%d %H:%M:%S",
+                        filename=filename,
+                        filemode="a")
 
 
 def parse_args():
@@ -114,16 +125,19 @@ def cut_sentence(args, line):
                 outstr += cur_full_word.encode('utf8') + "/" + cur_full_tag.encode('utf8') + " "
                 outstr = outstr.strip()
                 full_out_str += outstr + "\n"
+            logging.info('分词结果：{0}'.format(full_out_str.strip()))
             return full_out_str.strip()
 
 
 class LacHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
-        print(main_args)
+        logging.info(main_args)
         if self.request.arguments.has_key('data'):
+            logging.info(self.get_argument('data').encode(encoding='utf8'))
             result = cut_sentence(main_args, self.get_argument('data').encode(encoding='utf8'))
             self.write(result)
         else:
+            logging.info('没有数据')
             self.write('没有数据')
 
 
@@ -141,7 +155,8 @@ def make_app():
 
 if __name__ == "__main__":
     main_args = parse_args()
-    print(main_args)
+    init_logging('lac_server.log')
+    logging.info(main_args)
     app = make_app()
     http_server = httpserver.HTTPServer(app)
     http_server.listen(8888)
