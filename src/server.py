@@ -26,7 +26,9 @@ lac_lib = so('./lib/liblac.so')
 print("cut_sentence")
 lac_lib.freeme.argtypes = ctypes.c_void_p,
 lac_lib.freeme.restype = None
-lac_lib.cut_sentence.restype = ctypes.c_void_p
+lac_lib.cut.restype = ctypes.c_void_p
+lac_lib.lexer.restype = ctypes.c_void_p
+lac_lib.posseg.restype = ctypes.c_void_p
 
 
 def init_logging(filename):
@@ -144,23 +146,71 @@ def cut_sentence_python(args, line):
 
 
 def cut_sentence_cpp(line, conf_dir='../conf'):
-    result = lac_lib.cut_sentence(conf_dir, 512, line)
-    logging.info(type(result))
-    logging.info(hex(result))
+    result = lac_lib.cut(conf_dir, 512, line)
+    # logging.info(type(result))
+    # logging.info(hex(result))
     cut_result = ctypes.cast(result, ctypes.c_char_p).value
     logging.info("return result: " + cut_result)
     lac_lib.freeme(result)
-    logging.info(lac_lib.sum(1, 2))
+    # logging.info(lac_lib.sum(1, 2))
 
     return cut_result
 
 
-class LacHandler(tornado.web.RequestHandler):
+def lexer_sentence_cpp(line, conf_dir='../conf'):
+    result = lac_lib.lexer(conf_dir, 512, line)
+    # logging.info(type(result))
+    # logging.info(hex(result))
+    lexer_result = ctypes.cast(result, ctypes.c_char_p).value
+    logging.info("return result: " + lexer_result)
+    lac_lib.freeme(result)
+    # logging.info(lac_lib.sum(1, 2))
+
+    return lexer_result
+
+
+def posseg_sentence_cpp(line, conf_dir='../conf'):
+    result = lac_lib.posseg(conf_dir, 512, line)
+    # logging.info(type(result))
+    # logging.info(hex(result))
+    posseg_result = ctypes.cast(result, ctypes.c_char_p).value
+    logging.info("return result: " + posseg_result)
+    lac_lib.freeme(result)
+    # logging.info(lac_lib.sum(1, 2))
+
+    return posseg_result
+
+
+class CutHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
         logging.info(main_args)
         if self.request.arguments.has_key('data'):
             logging.info(self.get_argument('data').encode(encoding='utf8'))
             result = cut_sentence_cpp(self.get_argument('data').encode(encoding='utf8'), conf_dir=main_args.conf_path)
+            self.write(result)
+        else:
+            logging.info('没有数据')
+            self.write('没有数据')
+
+
+class LexerHandler(tornado.web.RequestHandler):
+    def post(self, *args, **kwargs):
+        logging.info(main_args)
+        if self.request.arguments.has_key('data'):
+            logging.info(self.get_argument('data').encode(encoding='utf8'))
+            result = lexer_sentence_cpp(self.get_argument('data').encode(encoding='utf8'), conf_dir=main_args.conf_path)
+            self.write(result)
+        else:
+            logging.info('没有数据')
+            self.write('没有数据')
+
+
+class PossegHandler(tornado.web.RequestHandler):
+    def post(self, *args, **kwargs):
+        logging.info(main_args)
+        if self.request.arguments.has_key('data'):
+            logging.info(self.get_argument('data').encode(encoding='utf8'))
+            result = posseg_sentence_cpp(self.get_argument('data').encode(encoding='utf8'), conf_dir=main_args.conf_path)
             self.write(result)
         else:
             logging.info('没有数据')
@@ -175,7 +225,9 @@ class MainHandler(tornado.web.RequestHandler):
 def make_app():
     return tornado.web.Application([
         (r"/", MainHandler),
-        (r"/lac", LacHandler),
+        (r"/cut", CutHandler),
+        (r"/lexer", LexerHandler),
+        (r"/posseg", PossegHandler),
     ])
 
 
