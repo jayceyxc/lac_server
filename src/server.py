@@ -146,14 +146,27 @@ def cut_sentence_python(args, line):
 
 
 def cut_sentence_cpp(line, conf_dir='../conf'):
-    result = lac_lib.cut(conf_dir, 512, line)
-    # logging.info(type(result))
-    # logging.info(hex(result))
+    max_result_num = 10240
+    result = lac_lib.cut(conf_dir, max_result_num, line.encode('utf8'))
+    if result is None:
+        temp_result_num = max_result_num * 10
+        result = lac_lib.cut(conf_dir, temp_result_num, line.encode('utf8'))
+        if result is None:
+            temp_result_num = temp_result_num * 10
+            result = lac_lib.cut(conf_dir, temp_result_num, line.encode('utf8'))
+            if result is None:
+                temp_result_num = temp_result_num * 10
+                result = lac_lib.cut(conf_dir, temp_result_num, line.encode('utf8'))
+            else:
+                logging.error('the content too long')
+                logging.warning(type(result))
     cut_result = ctypes.cast(result, ctypes.c_char_p).value
-    logging.info("return result: " + cut_result)
+    if cut_result is not None:
+        logging.info("return result: " + cut_result)
+    else:
+        logging.info("return None")
+        cut_result = ''
     lac_lib.freeme(result)
-    # logging.info(lac_lib.sum(1, 2))
-
     return cut_result
 
 
