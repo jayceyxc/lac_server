@@ -20,6 +20,7 @@ import infer
 import logging
 import os
 import ctypes
+import re
 
 so = ctypes.cdll.LoadLibrary
 lac_lib = so('./lib/liblac.so')
@@ -29,6 +30,14 @@ lac_lib.freeme.restype = None
 lac_lib.cut.restype = ctypes.c_void_p
 lac_lib.lexer.restype = ctypes.c_void_p
 lac_lib.posseg.restype = ctypes.c_void_p
+
+
+def extract_chinese(s):
+    line = s.strip().decode('utf-8', 'ignore')  # 处理前进行相关的处理，包括转换成Unicode等
+    p2 = re.compile(ur'[^\u4e00-\u9fa5]')  # 中文的编码范围是：\u4e00到\u9fa5
+    zh = " ".join(p2.split(line)).strip()
+    out_str = zh  # 经过相关处理后得到中文的文本
+    return out_str
 
 
 def init_logging(filename):
@@ -146,6 +155,7 @@ def cut_sentence_python(args, line):
 
 
 def cut_sentence_cpp(line, conf_dir='../conf'):
+    line = extract_chinese(line)
     max_result_num = 10240
     result = lac_lib.cut(conf_dir, max_result_num, line.encode('utf8'))
     if result is None:
