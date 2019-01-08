@@ -183,16 +183,16 @@ def cut_sentence_cpp(line, conf_dir='../conf'):
 
 def lexer_sentence_cpp(line, conf_dir='../conf'):
     max_result_num = 10240
-    result = lac_lib.lexer(conf_dir, max_result_num, line.encode('utf8'))
+    result = lac_lib.lexer(conf_dir, max_result_num, line)
     if result is None:
         temp_result_num = max_result_num * 10
-        result = lac_lib.lexer(conf_dir, temp_result_num, line.encode('utf8'))
+        result = lac_lib.lexer(conf_dir, temp_result_num, line)
         if result is None:
             temp_result_num = temp_result_num * 10
-            result = lac_lib.lexer(conf_dir, temp_result_num, line.encode('utf8'))
+            result = lac_lib.lexer(conf_dir, temp_result_num, line)
             if result is None:
                 temp_result_num = temp_result_num * 10
-                result = lac_lib.lexer(conf_dir, temp_result_num, line.encode('utf8'))
+                result = lac_lib.lexer(conf_dir, temp_result_num, line)
             else:
                 logging.error('the content too long')
                 logging.warning(type(result))
@@ -206,16 +206,16 @@ def lexer_sentence_cpp(line, conf_dir='../conf'):
 
 def posseg_sentence_cpp(line, conf_dir='../conf'):
     max_result_num = 10240
-    result = lac_lib.posseg(conf_dir, max_result_num, line.encode('utf8'))
+    result = lac_lib.posseg(conf_dir, max_result_num, line)
     if result is None:
         temp_result_num = max_result_num * 10
-        result = lac_lib.posseg(conf_dir, temp_result_num, line.encode('utf8'))
+        result = lac_lib.posseg(conf_dir, temp_result_num, line)
         if result is None:
             temp_result_num = temp_result_num * 10
-            result = lac_lib.posseg(conf_dir, temp_result_num, line.encode('utf8'))
+            result = lac_lib.posseg(conf_dir, temp_result_num, line)
             if result is None:
                 temp_result_num = temp_result_num * 10
-                result = lac_lib.posseg(conf_dir, temp_result_num, line.encode('utf8'))
+                result = lac_lib.posseg(conf_dir, temp_result_num, line)
             else:
                 logging.error('the content too long')
                 logging.warning(type(result))
