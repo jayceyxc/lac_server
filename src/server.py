@@ -182,9 +182,20 @@ def cut_sentence_cpp(line, conf_dir='../conf'):
 
 
 def lexer_sentence_cpp(line, conf_dir='../conf'):
-    result = lac_lib.lexer(conf_dir, 512, line)
-    # logging.info(type(result))
-    # logging.info(hex(result))
+    max_result_num = 10240
+    result = lac_lib.lexer(conf_dir, max_result_num, line.encode('utf8'))
+    if result is None:
+        temp_result_num = max_result_num * 10
+        result = lac_lib.lexer(conf_dir, temp_result_num, line.encode('utf8'))
+        if result is None:
+            temp_result_num = temp_result_num * 10
+            result = lac_lib.lexer(conf_dir, temp_result_num, line.encode('utf8'))
+            if result is None:
+                temp_result_num = temp_result_num * 10
+                result = lac_lib.lexer(conf_dir, temp_result_num, line.encode('utf8'))
+            else:
+                logging.error('the content too long')
+                logging.warning(type(result))
     lexer_result = ctypes.cast(result, ctypes.c_char_p).value
     logging.info("return result: " + lexer_result)
     lac_lib.freeme(result)
@@ -194,9 +205,20 @@ def lexer_sentence_cpp(line, conf_dir='../conf'):
 
 
 def posseg_sentence_cpp(line, conf_dir='../conf'):
-    result = lac_lib.posseg(conf_dir, 512, line)
-    # logging.info(type(result))
-    # logging.info(hex(result))
+    max_result_num = 10240
+    result = lac_lib.posseg(conf_dir, max_result_num, line.encode('utf8'))
+    if result is None:
+        temp_result_num = max_result_num * 10
+        result = lac_lib.posseg(conf_dir, temp_result_num, line.encode('utf8'))
+        if result is None:
+            temp_result_num = temp_result_num * 10
+            result = lac_lib.posseg(conf_dir, temp_result_num, line.encode('utf8'))
+            if result is None:
+                temp_result_num = temp_result_num * 10
+                result = lac_lib.posseg(conf_dir, temp_result_num, line.encode('utf8'))
+            else:
+                logging.error('the content too long')
+                logging.warning(type(result))
     posseg_result = ctypes.cast(result, ctypes.c_char_p).value
     logging.info("return result: " + posseg_result)
     lac_lib.freeme(result)
